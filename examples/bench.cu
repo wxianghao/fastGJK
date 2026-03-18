@@ -5,12 +5,13 @@
 #include <fastGJK/fastGJK.cuh>
 #include <iostream>
 
+#include "common.cuh"
+
 using namespace fastGJK;
 
 static ConvexHull generateConvex(int nvrtx, val_t offsetX, val_t offsetY, val_t offsetZ)
 {
-    Vec3 *verts;
-    cudaMallocHost(&verts, nvrtx * sizeof(Vec3));
+    Vec3 *verts = new Vec3[nvrtx];
 
     val_t scaleX     = 0.5f + ((val_t)rand() / RAND_MAX) * 1.5f;
     val_t scaleY     = 0.5f + ((val_t)rand() / RAND_MAX) * 1.5f;
@@ -32,40 +33,6 @@ static ConvexHull generateConvex(int nvrtx, val_t offsetX, val_t offsetY, val_t 
     return ConvexHull{.verts = verts, .n = nvrtx};
 }
 
-static void copy_colliders_to_device(ConvexHull      *&colliders_device,
-                                     Vec3            *&vrtx_device,
-                                     const ConvexHull *colliders_host,
-                                     unsigned int      n)
-{
-    // Count total number of vertices
-    unsigned int total_nvrtx = 0;
-    for (unsigned int i = 0; i < n; ++i) {
-        total_nvrtx += colliders_host[i].n;
-    }
-
-    // Allocate memory
-    cudaMalloc(&colliders_device, n * sizeof(ConvexHull));
-    cudaMalloc(&vrtx_device, total_nvrtx * sizeof(Vec3));
-    ConvexHull *colliders_tmp = new ConvexHull[n];
-
-    unsigned int offset = 0;
-    for (unsigned int i = 0; i < n; ++i) {
-        // Copy vertices
-        int nvrtx = colliders_host[i].n;
-        cudaMemcpy(vrtx_device + offset, colliders_host[i].verts, nvrtx * sizeof(Vec3), cudaMemcpyHostToDevice);
-        // Copy convex to host tmp
-        colliders_tmp[i] = {.verts = vrtx_device + offset, .n = nvrtx};
-        offset += nvrtx;
-    }
-
-    // Copy all the convexes
-    cudaMemcpy(colliders_device, colliders_tmp, n * sizeof(ConvexHull), cudaMemcpyHostToDevice);
-
-    // Clean-up memories
-    delete[] colliders_tmp;
-}
-
-
 int main(int argc, const char *argv[])
 {
     unsigned int n     = 10000;
@@ -85,24 +52,42 @@ int main(int argc, const char *argv[])
     std::cout << "Data generation time: " << generate_ms << " ms\n";
 
     // Move data to the device
-    Simplex    *simplices_device;
     ConvexHull *collidersA_device, *collidersB_device;
-    Vec3       *vrtxA_device, *vrtxB_device;
-    cudaMalloc(&simplices_device, n * sizeof(Simplex));
+    Vec3       *verts_device;
+    Simplex    *simplices_device;
+    val_t      *distances_device;
     auto copy_start = std::chrono::steady_clock::now();
-    copy_colliders_to_device(collidersA_device, vrtxA_device, collidersA, n);
-    copy_colliders_to_device(collidersB_device, vrtxB_device, collidersB, n);
+    prepareDataOnDevice(
+        collidersA, collidersB, collidersA_device, collidersB_device, verts_device, simplices_device, distances_device, n);
     auto copy_end = std::chrono::steady_clock::now();
     auto copy_ms  = std::chrono::duration_cast<std::chrono::milliseconds>(copy_end - copy_start).count();
     std::cout << "Copy time: " << copy_ms << " ms\n";
 
-    // Verify GJK
-    auto gjk_start = std::chrono::steady_clock::now();
-    warp::gjk_process(collidersA_device, collidersB_device, n, simplices_device);
+    // Warmup
+    for (int i = 0; i < 10; ++i) {
+        warp::gjk_process(collidersA_device, collidersB_device, n, simplices_device, distances_device);
+    }
+    cudaDeviceSynchronize();
+
+    // Benchmark GJK
+    constexpr int repeats = 100;
+    auto gjk_start        = std::chrono::steady_clock::now();
+    for (int i = 0; i < repeats; ++i) {
+        warp::gjk_process(collidersA_device, collidersB_device, n, simplices_device, distances_device);
+    }
     cudaDeviceSynchronize();
     auto gjk_end = std::chrono::steady_clock::now();
     auto gjk_us  = std::chrono::duration_cast<std::chrono::microseconds>(gjk_end - gjk_start).count();
-    std::cout << "GJK time: " << gjk_us << " us\n";
+    std::cout << "GJK avg time: " << gjk_us / repeats << " us (" << repeats << " runs)\n";
+
+    // Free memory
+    freeDeviceMem(collidersA_device, collidersB_device, verts_device, simplices_device, distances_device);
+    for (unsigned int i = 0; i < n; ++i) {
+        delete[] collidersA[i].verts;
+        delete[] collidersB[i].verts;
+    }
+    delete[] collidersA;
+    delete[] collidersB;
 
     return 0;
 }
