@@ -17,15 +17,15 @@ private:
 
 public:
     Vec3() = default;
-    DEVICE_PREFIX Vec3(val_t x, val_t y, val_t z)
+    COMMON_PREFIX Vec3(val_t x, val_t y, val_t z)
     {
         _data.x = x;
         _data.y = y;
         _data.z = z;
     }
-    DEVICE_PREFIX val_t x() const { return _data.x; }
-    DEVICE_PREFIX val_t y() const { return _data.y; }
-    DEVICE_PREFIX val_t z() const { return _data.z; }
+    COMMON_PREFIX val_t x() const { return _data.x; }
+    COMMON_PREFIX val_t y() const { return _data.y; }
+    COMMON_PREFIX val_t z() const { return _data.z; }
     DEVICE_PREFIX val_t dot(const Vec3 &rhs) const
     {
         return _data.x * rhs._data.x + _data.y * rhs._data.y + _data.z * rhs._data.z;
@@ -76,7 +76,7 @@ struct Simplex
     SupportPoint supports[4];
     uint8_t      n;
 
-    DEVICE_PREFIX Simplex()
+    COMMON_PREFIX Simplex()
         : n{0} {};
 
     DEVICE_PREFIX void push(const SupportPoint &support)

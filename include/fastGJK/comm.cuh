@@ -14,6 +14,7 @@ namespace fastGJK {
 
 // Util macros
 #define DEVICE_PREFIX __device__ __forceinline__
+#define COMMON_PREFIX __device__ __host__ __forceinline__
 
 // Types config
 #ifdef GJK_USE_DOUBLE
