@@ -162,10 +162,10 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
     int planeSum       = testPlaneTwo + testPlaneThree + testPlaneFour;
 
     // Vertex array indexed by [0]=s4, [1]=s3, [2]=s2 (matching reference)
-    const SupportPoint verts[3]     = {s4, s3, s2};
+    const SupportPoint verts[3]      = {s4, s3, s2};
     const bool         hff1_tests[3] = {hff1_s14, hff1_s13, hff1_s12};
 
-    int         i, j, k;
+    int          i, j, k;
     SupportPoint si, sj, sk;
 
     switch (planeSum) {
@@ -205,15 +205,23 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
         // Two faces face origin
         // k = vertex on the non-facing face (must be in solution)
         if (testPlaneTwo) {
-            k = 2; i = 1; j = 0;
+            k = 2;
+            i = 1;
+            j = 0;
         }
         else if (testPlaneThree) {
-            k = 1; i = 0; j = 2;
+            k = 1;
+            i = 0;
+            j = 2;
         }
         else {
-            k = 0; i = 2; j = 1;
+            k = 0;
+            i = 2;
+            j = 1;
         }
-        si = verts[i]; sj = verts[j]; sk = verts[k];
+        si              = verts[i];
+        sj              = verts[j];
+        sk              = verts[k];
         const Vec3 &sip = si.supportPoint;
         const Vec3 &sjp = sj.supportPoint;
         const Vec3 &skp = sk.supportPoint;
@@ -221,43 +229,54 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
         if (dotTotal == 1) {
             if (hff1_tests[k]) {
                 if (!hff2(s1p, skp, sip)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, sip, skp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = si;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, sip, skp);
                 }
                 else if (!hff2(s1p, skp, sjp)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, sjp, skp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = sj;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, sjp, skp);
                 }
                 else {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnLine(s1p, skp);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnLine(s1p, skp);
                 }
             }
             else if (hff1_tests[i]) {
                 if (!hff2(s1p, sip, skp)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, sip, skp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = si;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, sip, skp);
                 }
                 else {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = si;
-                    dir_out = projectOriginOnLine(s1p, sip);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = si;
+                    dir_out                 = projectOriginOnLine(s1p, sip);
                 }
             }
             else {
                 if (!hff2(s1p, sjp, skp)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, sjp, skp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = sj;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, sjp, skp);
                 }
                 else {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sj;
-                    dir_out = projectOriginOnLine(s1p, sjp);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = sj;
+                    dir_out                 = projectOriginOnLine(s1p, sjp);
                 }
             }
         }
@@ -265,52 +284,64 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
             if (hff1_tests[i]) {
                 if (!hff2(s1p, skp, sip)) {
                     if (!hff2(s1p, sip, skp)) {
-                        simplex_mut.n = 3;
-                        simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnPlane(s1p, sip, skp);
+                        simplex_mut.n           = 3;
+                        simplex_mut.supports[2] = s1;
+                        simplex_mut.supports[1] = si;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnPlane(s1p, sip, skp);
                     }
                     else {
-                        simplex_mut.n = 2;
-                        simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnLine(s1p, skp);
+                        simplex_mut.n           = 2;
+                        simplex_mut.supports[1] = s1;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnLine(s1p, skp);
                     }
                 }
                 else {
                     if (!hff2(s1p, skp, sjp)) {
-                        simplex_mut.n = 3;
-                        simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnPlane(s1p, sjp, skp);
+                        simplex_mut.n           = 3;
+                        simplex_mut.supports[2] = s1;
+                        simplex_mut.supports[1] = sj;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnPlane(s1p, sjp, skp);
                     }
                     else {
-                        simplex_mut.n = 2;
-                        simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnLine(s1p, skp);
+                        simplex_mut.n           = 2;
+                        simplex_mut.supports[1] = s1;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnLine(s1p, skp);
                     }
                 }
             }
             else if (hff1_tests[j]) {
                 if (!hff2(s1p, skp, sjp)) {
                     if (!hff2(s1p, sjp, skp)) {
-                        simplex_mut.n = 3;
-                        simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnPlane(s1p, sjp, skp);
+                        simplex_mut.n           = 3;
+                        simplex_mut.supports[2] = s1;
+                        simplex_mut.supports[1] = sj;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnPlane(s1p, sjp, skp);
                     }
                     else {
-                        simplex_mut.n = 2;
-                        simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sj;
-                        dir_out = projectOriginOnLine(s1p, sjp);
+                        simplex_mut.n           = 2;
+                        simplex_mut.supports[1] = s1;
+                        simplex_mut.supports[0] = sj;
+                        dir_out                 = projectOriginOnLine(s1p, sjp);
                     }
                 }
                 else {
                     if (!hff2(s1p, skp, sip)) {
-                        simplex_mut.n = 3;
-                        simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnPlane(s1p, sip, skp);
+                        simplex_mut.n           = 3;
+                        simplex_mut.supports[2] = s1;
+                        simplex_mut.supports[1] = si;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnPlane(s1p, sip, skp);
                     }
                     else {
-                        simplex_mut.n = 2;
-                        simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                        dir_out = projectOriginOnLine(s1p, skp);
+                        simplex_mut.n           = 2;
+                        simplex_mut.supports[1] = s1;
+                        simplex_mut.supports[0] = sk;
+                        dir_out                 = projectOriginOnLine(s1p, skp);
                     }
                 }
             }
@@ -322,32 +353,39 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
             bool hff2_kj = hff2(s1p, skp, sjp);
 
             if (hff2_ki && hff2_kj) {
-                simplex_mut.n = 2;
-                simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                dir_out = projectOriginOnLine(s1p, skp);
+                simplex_mut.n           = 2;
+                simplex_mut.supports[1] = s1;
+                simplex_mut.supports[0] = sk;
+                dir_out                 = projectOriginOnLine(s1p, skp);
             }
             else if (hff2_ki) {
                 if (hff2_jk) {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sj;
-                    dir_out = projectOriginOnLine(s1p, sjp);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = sj;
+                    dir_out                 = projectOriginOnLine(s1p, sjp);
                 }
                 else {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, skp, sjp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = sj;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, skp, sjp);
                 }
             }
             else {
                 if (hff2_ik) {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = si;
-                    dir_out = projectOriginOnLine(s1p, sip);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = si;
+                    dir_out                 = projectOriginOnLine(s1p, sip);
                 }
                 else {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, skp, sip);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = si;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, skp, sip);
                 }
             }
         }
@@ -359,77 +397,106 @@ static DEVICE_PREFIX void handleSimplexTetra(Simplex &simplex_mut, Vec3 &dir_out
         if (dotTotal == 1) {
             // i is the vertex with positive hff1 test
             if (hff1_s13) {
-                k = 2; i = 1; j = 0;
+                k = 2;
+                i = 1;
+                j = 0;
             }
             else if (hff1_s14) {
-                k = 1; i = 0; j = 2;
+                k = 1;
+                i = 0;
+                j = 2;
             }
             else {
-                k = 0; i = 2; j = 1;
+                k = 0;
+                i = 2;
+                j = 1;
             }
-            si = verts[i]; sj = verts[j]; sk = verts[k];
+            si              = verts[i];
+            sj              = verts[j];
+            sk              = verts[k];
             const Vec3 &sip = si.supportPoint;
             const Vec3 &sjp = sj.supportPoint;
             const Vec3 &skp = sk.supportPoint;
 
             if (!hff2(s1p, sip, sjp)) {
-                simplex_mut.n = 3;
-                simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sj;
-                dir_out = projectOriginOnPlane(s1p, sip, sjp);
+                simplex_mut.n           = 3;
+                simplex_mut.supports[2] = s1;
+                simplex_mut.supports[1] = si;
+                simplex_mut.supports[0] = sj;
+                dir_out                 = projectOriginOnPlane(s1p, sip, sjp);
             }
             else if (!hff2(s1p, sip, skp)) {
-                simplex_mut.n = 3;
-                simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                dir_out = projectOriginOnPlane(s1p, sip, skp);
+                simplex_mut.n           = 3;
+                simplex_mut.supports[2] = s1;
+                simplex_mut.supports[1] = si;
+                simplex_mut.supports[0] = sk;
+                dir_out                 = projectOriginOnPlane(s1p, sip, skp);
             }
             else {
-                simplex_mut.n = 2;
-                simplex_mut.supports[1] = s1; simplex_mut.supports[0] = si;
-                dir_out = projectOriginOnLine(s1p, sip);
+                simplex_mut.n           = 2;
+                simplex_mut.supports[1] = s1;
+                simplex_mut.supports[0] = si;
+                dir_out                 = projectOriginOnLine(s1p, sip);
             }
         }
         else if (dotTotal == 2) {
             // i is the vertex with negative hff1 test
             if (!hff1_s13) {
-                k = 2; i = 1; j = 0;
+                k = 2;
+                i = 1;
+                j = 0;
             }
             else if (!hff1_s14) {
-                k = 1; i = 0; j = 2;
+                k = 1;
+                i = 0;
+                j = 2;
             }
             else {
-                k = 0; i = 2; j = 1;
+                k = 0;
+                i = 2;
+                j = 1;
             }
-            si = verts[i]; sj = verts[j]; sk = verts[k];
+            si              = verts[i];
+            sj              = verts[j];
+            sk              = verts[k];
             const Vec3 &sip = si.supportPoint;
             const Vec3 &sjp = sj.supportPoint;
             const Vec3 &skp = sk.supportPoint;
 
             if (!hff2(s1p, sjp, skp)) {
                 if (!hff2(s1p, skp, sjp)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = sj; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, sjp, skp);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = sj;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, sjp, skp);
                 }
                 else if (!hff2(s1p, skp, sip)) {
-                    simplex_mut.n = 3;
-                    simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnPlane(s1p, skp, sip);
+                    simplex_mut.n           = 3;
+                    simplex_mut.supports[2] = s1;
+                    simplex_mut.supports[1] = si;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnPlane(s1p, skp, sip);
                 }
                 else {
-                    simplex_mut.n = 2;
-                    simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sk;
-                    dir_out = projectOriginOnLine(s1p, skp);
+                    simplex_mut.n           = 2;
+                    simplex_mut.supports[1] = s1;
+                    simplex_mut.supports[0] = sk;
+                    dir_out                 = projectOriginOnLine(s1p, skp);
                 }
             }
             else if (!hff2(s1p, sjp, sip)) {
-                simplex_mut.n = 3;
-                simplex_mut.supports[2] = s1; simplex_mut.supports[1] = si; simplex_mut.supports[0] = sj;
-                dir_out = projectOriginOnPlane(s1p, sip, sjp);
+                simplex_mut.n           = 3;
+                simplex_mut.supports[2] = s1;
+                simplex_mut.supports[1] = si;
+                simplex_mut.supports[0] = sj;
+                dir_out                 = projectOriginOnPlane(s1p, sip, sjp);
             }
             else {
-                simplex_mut.n = 2;
-                simplex_mut.supports[1] = s1; simplex_mut.supports[0] = sj;
-                dir_out = projectOriginOnLine(s1p, sjp);
+                simplex_mut.n           = 2;
+                simplex_mut.supports[1] = s1;
+                simplex_mut.supports[0] = sj;
+                dir_out                 = projectOriginOnLine(s1p, sjp);
             }
         }
         break;
@@ -463,7 +530,12 @@ static DEVICE_PREFIX void handleSimplex(Simplex &simplex_mut, Vec3 &dir_out)
 // ============================================================================
 
 DEVICE_PREFIX
-void gjk_process_device(const Vec3 *vertsA_in, int nA, const Vec3 *vertsB_in, int nB, Simplex &simplex_out)
+void gjk_process_device(const Vec3 *vertsA_in,
+                        int         nA,
+                        const Vec3 *vertsB_in,
+                        int         nB,
+                        Simplex    &simplex_out,
+                        val_t      &distance_out)
 {
     val_t norm2SupportMax{0};
 
@@ -517,14 +589,19 @@ void gjk_process_device(const Vec3 *vertsA_in, int nA, const Vec3 *vertsB_in, in
 
         ++k;
     } while (k < GJK_MAX_ITERS);
+
+    distance_out = sqrt(dir.norm2());
 }
 
 // ============================================================================
 // Kernel-level APIs
 // ============================================================================
 
-__global__ void
-gjk_process_kernel(const ConvexHull *hullsA_in, const ConvexHull *hullsB_in, unsigned int n, Simplex *simplices_out)
+__global__ void gjk_process_kernel(const ConvexHull *hullsA_in,
+                                   const ConvexHull *hullsB_in,
+                                   unsigned int      n,
+                                   Simplex          *simplices_out,
+                                   val_t            *distances_out)
 {
     unsigned int idx          = blockIdx.x * blockDim.x + threadIdx.x;
     unsigned int collisionIdx = idx / WARP_SIZE;
@@ -540,14 +617,16 @@ gjk_process_kernel(const ConvexHull *hullsA_in, const ConvexHull *hullsB_in, uns
     const Vec3 *vertsB = hullsB_in[collisionIdx].verts;
     int         nB     = hullsB_in[collisionIdx].n;
     Simplex     simplex;
+    val_t       distance;
 
 
     // Call device function to handle each collision pair by a warp
-    gjk_process_device(vertsA, nA, vertsB, nB, simplex);
+    gjk_process_device(vertsA, nA, vertsB, nB, simplex, distance);
 
     if (warpLane == 0) {
         // * register -> global
         simplices_out[collisionIdx] = simplex;
+        distances_out[collisionIdx] = distance;
     }
 }
 
@@ -556,12 +635,16 @@ gjk_process_kernel(const ConvexHull *hullsA_in, const ConvexHull *hullsB_in, uns
 // ============================================================================
 
 template <unsigned int blockSize = 256>
-void gjk_process(const ConvexHull *hullsA_in, const ConvexHull *hullsB_in, unsigned int n, Simplex *simplices_out)
+void gjk_process(const ConvexHull *hullsA_in,
+                 const ConvexHull *hullsB_in,
+                 unsigned int      n,
+                 Simplex          *simplices_out,
+                 val_t            *distances_out)
 {
     static_assert(blockSize % WARP_SIZE == 0, "block_size must be divisible by WARP_SIZE!");
     unsigned int collisionsPerBlock = blockSize / WARP_SIZE;
     unsigned int numBlocks          = (n + collisionsPerBlock - 1) / collisionsPerBlock;
-    gjk_process_kernel<<<numBlocks, blockSize>>>(hullsA_in, hullsB_in, n, simplices_out);
+    gjk_process_kernel<<<numBlocks, blockSize>>>(hullsA_in, hullsB_in, n, simplices_out, distances_out);
 }
 
 } // namespace fastGJK::warp
