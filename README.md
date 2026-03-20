@@ -3,15 +3,20 @@
 FastGJK is a header-only library implementing CUDA accelerated GJK and EPA (TODO) algorithms.
 
 # Build
+To build examples/tests/benchmarks:
 ```bash
 cmake -B build
 cmake --build build [-D<build_option>=<value>...]
 ```
 
-The following table lists the build options.
+The following table lists the build options:
 |  Build option   | Default value  | Description |
 |  ----  | ----  | ---- |
 | `FASTGJK_BUILD_TESTS=ON/OFF`  | `ON` | Build unit tests |
+
+# Unit tests
+To run a test suite:
+- GJK tests: `./build/tests/testGJK`
 
 # Acknowledgements
 Our code is heavily borrowed from [OpenGJK](https://github.com/MattiaMontanari/openGJK).
