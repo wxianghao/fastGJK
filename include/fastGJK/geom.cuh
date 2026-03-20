@@ -81,7 +81,13 @@ struct Simplex
 
     DEVICE_PREFIX void push(const SupportPoint &support)
     {
-        supports[n] = support;
+#pragma unroll
+        for (uint8_t i = 0; i < 4; ++i) {
+            if (i == n) {
+                supports[i] = support;
+            }
+        }
+
         ++n;
     }
 
