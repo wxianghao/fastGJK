@@ -18,8 +18,8 @@ endif()
 # Require CUDA for consumers
 target_compile_features(fastGJK INTERFACE cuda_std_14)
 
-# Example programs
-option(FASTGJK_BUILD_EXAMPLES "Build example programs" ON)
+# Test programs
+option(FASTGJK_BUILD_TESTS "Build test programs" ON)
 if(FASTGJK_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+    add_subdirectory(tests)
 endif()
