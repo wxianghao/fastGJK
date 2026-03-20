@@ -2,6 +2,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <random>
 
 #include "common.cuh"
@@ -37,7 +38,7 @@ static fastGJK::ConvexHull createPoly(std::initializer_list<fastGJK::Vec3> verts
 }
 
 TEST_SUITE_BEGIN("Test GJK");
-TEST_CASE("Single collision")
+TEST_CASE("Simple case")
 {
     fastGJK::ConvexHull *objA_device, *objB_device;
     fastGJK::Simplex    *simplex_device, *simplex_host;
@@ -166,131 +167,52 @@ TEST_CASE("Single collision")
     delete[] objB_host.verts;
 }
 
-// Generate box vertices: 8 corners + random surface points to reach nVerts
-static void generateBoxVerts(fastGJK::Vec3 *verts,
-                             int            nVerts,
-                             fastGJK::val_t cx,
-                             fastGJK::val_t cy,
-                             fastGJK::val_t cz,
-                             fastGJK::val_t hx,
-                             fastGJK::val_t hy,
-                             fastGJK::val_t hz,
-                             std::mt19937  &rng)
+TEST_CASE("Complex case")
 {
-    using namespace fastGJK;
-    int idx = 0;
-    for (int sx = -1; sx <= 1; sx += 2)
-        for (int sy = -1; sy <= 1; sy += 2)
-            for (int sz = -1; sz <= 1; sz += 2)
-                verts[idx++] = Vec3(cx + sx * hx, cy + sy * hy, cz + sz * hz);
+    fastGJK::ConvexHull *hullsA_host, *hullsB_host;
+    fastGJK::val_t      *distances_host, *expected;
+    fastGJK::Simplex    *simplices_host;
+    unsigned int         n;
+    std::string          filename;
 
-    std::uniform_int_distribution<int>    faceDist(0, 5);
-    std::uniform_real_distribution<val_t> uvDist(val_t(-1), val_t(1));
-    for (int j = 8; j < nVerts; j++) {
-        val_t u = uvDist(rng), v = uvDist(rng);
-        val_t x, y, z;
-        switch (faceDist(rng)) {
-        case 0:
-            x = cx + hx;
-            y = cy + u * hy;
-            z = cz + v * hz;
-            break;
-        case 1:
-            x = cx - hx;
-            y = cy + u * hy;
-            z = cz + v * hz;
-            break;
-        case 2:
-            x = cx + u * hx;
-            y = cy + hy;
-            z = cz + v * hz;
-            break;
-        case 3:
-            x = cx + u * hx;
-            y = cy - hy;
-            z = cz + v * hz;
-            break;
-        case 4:
-            x = cx + u * hx;
-            y = cy + v * hy;
-            z = cz + hz;
-            break;
-        default:
-            x = cx + u * hx;
-            y = cy + v * hy;
-            z = cz - hz;
-            break;
-        }
-        verts[j] = Vec3(x, y, z);
-    }
-}
+    SUBCASE("Corner case") { filename = "data/input_corner1.txt"; }
+    SUBCASE("Dataset with 1000 samples") { filename = "data/input_1000.txt"; }
 
-//! Generate by Claude code
-TEST_CASE("Batched collision")
-{
-    using namespace fastGJK;
-    constexpr int n        = 3000;
-    constexpr int maxVerts = 256;
-    constexpr int minVerts = 8; // at least 8 for box corners
+    // Load data to main memory
+    REQUIRE(readDataset(filename, hullsA_host, hullsB_host, expected, n));
 
-    std::mt19937                          rng(42);
-    std::uniform_int_distribution<int>    vertDist(minVerts, maxVerts);
-    std::uniform_real_distribution<val_t> centerDist(val_t(-50), val_t(50));
-    std::uniform_real_distribution<val_t> halfExtDist(val_t(0.5), val_t(5));
-
-    auto *objA_host = new ConvexHull[n];
-    auto *objB_host = new ConvexHull[n];
-    auto *expected  = new val_t[n];
-
-    for (int i = 0; i < n; i++) {
-        int   nA = vertDist(rng), nB = vertDist(rng);
-        val_t cAx = centerDist(rng), cAy = centerDist(rng), cAz = centerDist(rng);
-        val_t hAx = halfExtDist(rng), hAy = halfExtDist(rng), hAz = halfExtDist(rng);
-        val_t cBx = centerDist(rng), cBy = centerDist(rng), cBz = centerDist(rng);
-        val_t hBx = halfExtDist(rng), hBy = halfExtDist(rng), hBz = halfExtDist(rng);
-
-        objA_host[i].n     = nA;
-        objA_host[i].verts = new Vec3[nA];
-        objB_host[i].n     = nB;
-        objB_host[i].verts = new Vec3[nB];
-
-        generateBoxVerts(objA_host[i].verts, nA, cAx, cAy, cAz, hAx, hAy, hAz, rng);
-        generateBoxVerts(objB_host[i].verts, nB, cBx, cBy, cBz, hBx, hBy, hBz, rng);
-
-        // Analytical box-box distance
-        val_t dx    = std::max(val_t(0), std::abs(cAx - cBx) - hAx - hBx);
-        val_t dy    = std::max(val_t(0), std::abs(cAy - cBy) - hAy - hBy);
-        val_t dz    = std::max(val_t(0), std::abs(cAz - cBz) - hAz - hBz);
-        expected[i] = std::sqrt(dx * dx + dy * dy + dz * dz);
-    }
-
-    // Run on GPU
-    ConvexHull *objA_device, *objB_device;
-    Simplex    *simplex_device, *simplex_host;
-    Vec3       *verts_device;
-    val_t      *distance_device, *distance_host;
-
+    // Copy data to device memory
+    fastGJK::ConvexHull *hullsA_device, *hullsB_device;
+    fastGJK::val_t      *distances_device;
+    fastGJK::Simplex    *simplices_device;
+    fastGJK::Vec3       *verts_device;
     prepareDataOnDevice(
-        objA_host, objB_host, objA_device, objB_device, verts_device, simplex_device, distance_device, n);
-    warp::gjk_process(objA_device, objB_device, n, simplex_device, distance_device);
-    copyResultToHost(simplex_device, distance_device, simplex_host, distance_host, n);
+        hullsA_host, hullsB_host, hullsA_device, hullsB_device, verts_device, simplices_device, distances_device, n);
+
+    // Run
+    fastGJK::warp::gjk_process(hullsA_device, hullsB_device, n, simplices_device, distances_device);
+
+    // Copy result to host
+    copyResultToHost(simplices_device, distances_device, simplices_host, distances_host, n);
+
 
     // Verify results
-    for (int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < n; i++) {
         INFO("Pair index: ", i);
-        val_t tol = std::max(val_t(0.01), std::abs(expected[i]) * val_t(0.01));
-        CHECK(std::abs(distance_host[i] - expected[i]) < tol);
+        INFO("Actual: ", distances_host[i], "; Expected: ", expected[i]);
+        fastGJK::val_t tol = std::max(fastGJK::val_t(0.01), std::abs(expected[i]) * fastGJK::val_t(0.01));
+        CHECK(std::abs(distances_host[i] - expected[i]) < tol);
     }
 
-    // Cleanup
-    freeDeviceMem(objA_device, objB_device, verts_device, simplex_device, distance_device);
-    freeHostMem(simplex_host, distance_host);
-    for (int i = 0; i < n; i++) {
-        delete[] objA_host[i].verts;
-        delete[] objB_host[i].verts;
+    // Free resources
+    freeDeviceMem(hullsA_device, hullsB_device, verts_device, simplices_device, distances_device);
+    freeHostMem(simplices_host, distances_host);
+    for (unsigned int i = 0; i < n; ++i) {
+        delete[] hullsA_host[i].verts;
+        delete[] hullsB_host[i].verts;
     }
-    delete[] objA_host;
-    delete[] objB_host;
+    delete[] hullsA_host;
+    delete[] hullsB_host;
     delete[] expected;
 }
 

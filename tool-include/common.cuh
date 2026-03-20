@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <cuda_runtime.h>
 #include <fastGJK/fastGJK.cuh>
+#include <fstream>
 
 void prepareDataOnDevice(const fastGJK::ConvexHull *hullsA_host,
                          const fastGJK::ConvexHull *hullsB_host,
@@ -93,4 +94,56 @@ void freeHostMem(fastGJK::Simplex *simplices_host, fastGJK::val_t *distances_hos
 {
     free(simplices_host);
     free(distances_host);
+}
+
+bool readDataset(const std::string    &filename,
+                 fastGJK::ConvexHull *&hullsA,
+                 fastGJK::ConvexHull *&hullsB,
+                 fastGJK::val_t      *&distances,
+                 unsigned int         &n)
+{
+    std::ifstream in{filename};
+
+    // Ensure the file is open
+    if (!in.is_open()) {
+        return false;
+    }
+
+    // Read the number of samples
+    in >> n;
+
+    // Allocate memory
+    distances = new fastGJK::val_t[n];
+    hullsA    = new fastGJK::ConvexHull[n];
+    hullsB    = new fastGJK::ConvexHull[n];
+
+    // Read each sample
+    for (unsigned int i = 0; i < n; ++i) {
+        auto &A = hullsA[i];
+        auto &B = hullsB[i];
+
+        // Read distance
+        in >> distances[i];
+
+        // Read first object
+        in >> A.n;
+        A.verts = new fastGJK::Vec3[A.n];
+        for (int j = 0; j < A.n; ++j) {
+            fastGJK::val_t x, y, z;
+            in >> x >> y >> z;
+            A.verts[j] = {x, y, z};
+        }
+
+        // Read second object
+        in >> B.n;
+        B.verts = new fastGJK::Vec3[B.n];
+        for (int j = 0; j < B.n; ++j) {
+            fastGJK::val_t x, y, z;
+            in >> x >> y >> z;
+            B.verts[j] = {x, y, z};
+        }
+    }
+
+    in.close();
+    return true;
 }
