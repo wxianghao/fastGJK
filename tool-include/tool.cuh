@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <fastGJK/fastGJK.cuh>
+#include <fstream>
 #include <numeric>
 #include <stdexcept>
 #include <string>
+
 template <typename T> struct GJKData
 {
     unsigned int n;
