@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.18)
-project(fastGJK LANGUAGES CUDA)
+project(fastGJK LANGUAGES CXX CUDA)
+
+# Set language standards
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_STANDARD 17)
+set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 # Header-only interface library
 add_library(fastGJK INTERFACE)
@@ -27,8 +33,8 @@ if(FASTGJK_BUILD_TESTS)
     add_subdirectory(tests)
 endif()
 
-# # Benchmark programs
-# option(FASTGJK_BUILD_BENCHMARKS "Build benchmark programs" ON)
-# if(FASTGJK_BUILD_BENCHMARKS)
-#     add_subdirectory(benchmarks)
-# endif()
+# Benchmark programs
+option(FASTGJK_BUILD_BENCHMARKS "Build benchmark programs" ON)
+if(FASTGJK_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
+endif()
