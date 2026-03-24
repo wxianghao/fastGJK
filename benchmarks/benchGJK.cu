@@ -18,6 +18,8 @@ void bench(nvbench::state &nvstate)
     unsigned int n;
     int         *nvertsA, *nvertsB;
 
+    printf("Benchmarking GJK with %s\n", filename.c_str());
+
     // Query bench inputs
     const auto blockSize = nvstate.get_int64("block_size");
 
