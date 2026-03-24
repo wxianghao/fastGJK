@@ -37,6 +37,7 @@ TEST_SUITE("Test GJK with large dataset")
             fastGJK::val_t expected = state.distances_expected[i];
             INFO("Pair index: ", i);
             INFO("Actual: ", actual, "; Expected: ", expected);
+            INFO("CUDA error: ", std::string(cudaGetErrorString(cudaGetLastError())));
             fastGJK::val_t tol = std::max(fastGJK::val_t(0.01), std::abs(expected) * fastGJK::val_t(0.01));
             CHECK(std::abs(actual - expected) < tol);
         }
