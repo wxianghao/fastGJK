@@ -33,11 +33,35 @@ void bench(nvbench::state &nvstate)
     // Copy input data to GPU
     state.copyInputToGpu();
 
-    // Determine kernel lauch grid
-    const auto gridSize = (n + blockSize - 1) / blockSize;
+    // Bench
     nvstate.exec([&](nvbench::launch &launch) {
-        fastGJK::warp::gjk_process_kernel<<<gridSize, blockSize, 0, launch.get_stream()>>>(
-            state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+        // fastGJK::warp::gjk_process_kernel<<<gridSize, blockSize, 0, launch.get_stream()>>>(
+        //     state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+        switch (blockSize) {
+        case 64:
+            fastGJK::warp::gjk_process<64>(
+                state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+            break;
+        case 128:
+            fastGJK::warp::gjk_process<128>(
+                state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+            break;
+        case 256:
+            fastGJK::warp::gjk_process<256>(
+                state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+            break;
+        case 512:
+            fastGJK::warp::gjk_process<512>(
+                state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+            break;
+        case 1024:
+            fastGJK::warp::gjk_process<1024>(
+                state.hullsA.device, state.hullsB.device, n, state.simplices.device, state.distances.device);
+            break;
+        default:
+            printf("Unsupported block size: %ld\n", blockSize);
+            break;
+        }
     });
 }
 
