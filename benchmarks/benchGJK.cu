@@ -6,7 +6,7 @@
 
 #include "tool.cuh"
 
-#define BENCH_BLOCK_SIZES 32, 64, 128
+#define AVAILABLE_BLOCK_SIZES 32, 64, 128
 
 std::string filename;
 
@@ -30,18 +30,18 @@ void bench(nvbench::state &nvstate)
 
     // Bench
     nvstate.exec([&](nvbench::launch &launch) {
-        if (!dispatch_gjk<BENCH_BLOCK_SIZES>(blockSize,
-                                             state.hullsA.device,
-                                             state.hullsB.device,
-                                             n,
-                                             state.simplices.device,
-                                             state.distances.device)) {
+        if (!dispatch_gjk<AVAILABLE_BLOCK_SIZES>(blockSize,
+                                                 state.hullsA.device,
+                                                 state.hullsB.device,
+                                                 n,
+                                                 state.simplices.device,
+                                                 state.distances.device)) {
             printf("Unsupported block size: %ld\n", blockSize);
         }
     });
 }
 
-NVBENCH_BENCH(bench).add_int64_axis("block_size", {BENCH_BLOCK_SIZES});
+NVBENCH_BENCH(bench).add_int64_axis("block_size", {AVAILABLE_BLOCK_SIZES});
 
 int main(int argc, char **argv)
 {

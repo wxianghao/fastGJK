@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <string>
 
+#define AVAILABLE_BLOCK_SIZES 32, 64, 128
+
 template <int First, int... Rest>
 bool dispatch_gjk(int64_t              blockSize,
                   fastGJK::ConvexHull *hullsA,
