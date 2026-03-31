@@ -81,14 +81,26 @@ struct Simplex
 
     DEVICE_PREFIX void push(const SupportPoint &support)
     {
-#pragma unroll
-        for (uint8_t i = 0; i < 4; ++i) {
-            if (i == n) {
-                supports[i] = support;
-            }
+        switch (n) {
+        case 0:
+            supports[0] = support;
+            n           = 1;
+            break;
+        case 1:
+            supports[1] = support;
+            n           = 2;
+            break;
+        case 2:
+            supports[2] = support;
+            n           = 3;
+            break;
+        case 3:
+            supports[3] = support;
+            n           = 4;
+            break;
+        default:
+            break;
         }
-
-        ++n;
     }
 
     DEVICE_PREFIX void degenerate1D1(Vec3 &dir_out)
