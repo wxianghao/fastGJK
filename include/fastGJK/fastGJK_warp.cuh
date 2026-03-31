@@ -634,7 +634,7 @@ __global__ void gjk_process_kernel(const ConvexHull *hullsA_in,
 // Host-side APIs
 // ============================================================================
 
-template <unsigned int blockSize = 256>
+template <unsigned int blockSize = 32>
 void gjk_process(const ConvexHull *hullsA_in,
                  const ConvexHull *hullsB_in,
                  unsigned int      n,
