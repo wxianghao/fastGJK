@@ -1,0 +1,3 @@
+[submodule "third-parties/openGJK"]
+	path = third-parties/openGJK
+	url = https://github.com/wang-xianghao/openGJK.git
