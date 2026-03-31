@@ -1,0 +1,1 @@
+ncu -f -o profileGJK_100000 --profile-from-start off --set full ./build/benchmarks/profileGJK ./data/input_100000.txt

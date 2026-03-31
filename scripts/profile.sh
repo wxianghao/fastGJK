@@ -1,1 +1,0 @@
-ncu -f -o profileGJK --profile-from-start off --set full ./build/benchmarks/profileGJK
