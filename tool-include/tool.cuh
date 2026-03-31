@@ -7,6 +7,24 @@
 #include <stdexcept>
 #include <string>
 
+template <int First, int... Rest>
+bool dispatch_gjk(int64_t              blockSize,
+                  fastGJK::ConvexHull *hullsA,
+                  fastGJK::ConvexHull *hullsB,
+                  unsigned int         n,
+                  fastGJK::Simplex    *simplices,
+                  float               *distances)
+{
+    if (blockSize == First) {
+        fastGJK::warp::gjk_process<First>(hullsA, hullsB, n, simplices, distances);
+        return true;
+    }
+    if constexpr (sizeof...(Rest) > 0) {
+        return dispatch_gjk<Rest...>(blockSize, hullsA, hullsB, n, simplices, distances);
+    }
+    return false;
+}
+
 template <typename T> struct GJKData
 {
     unsigned int n;

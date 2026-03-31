@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(nvbench)
 
 add_executable(benchGJK benchGJK.cu)
 target_include_directories(benchGJK PRIVATE ${CMAKE_SOURCE_DIR}/tool-include)
-target_link_libraries(benchGJK PRIVATE fastGJK::fastGJK nvbench::main)
+target_link_libraries(benchGJK PRIVATE fastGJK::fastGJK nvbench::nvbench)
 if(FASTGJK_LARGE_DATASET)
 target_compile_definitions(benchGJK PRIVATE FASTGJK_LARGE_DATASET)
 endif()
