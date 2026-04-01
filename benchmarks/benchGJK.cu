@@ -29,7 +29,7 @@ void bench(nvbench::state &nvstate)
     state.copyInputToGpu();
 
     // Bench
-    nvstate.exec([&](nvbench::launch &launch) {
+    nvstate.exec(nvbench::exec_tag::sync, [&](nvbench::launch &launch) {
         if (!dispatch_gjk<AVAILABLE_BLOCK_SIZES>(blockSize,
                                                  state.hullsA.device,
                                                  state.hullsB.device,
@@ -37,6 +37,9 @@ void bench(nvbench::state &nvstate)
                                                  state.simplices.device,
                                                  state.distances.device)) {
             printf("Unsupported block size: %ld\n", blockSize);
+        }
+        else {
+            cudaDeviceSynchronize();
         }
     });
 }
