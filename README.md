@@ -1,6 +1,6 @@
 # FastGJK
 
-FastGJK is a header-only library implementing CUDA accelerated GJK and EPA (TODO) algorithms.
+FastGJK is a header-only library implementing CUDA-accelerated GJK and EPA (TODO) algorithms.
 
 # Build
 To build examples/tests/benchmarks:
@@ -14,15 +14,15 @@ The following table lists the build options:
 |  ----  | ----  | ---- |
 | `FASTGJK_BUILD_TESTS=ON/OFF`  | `ON` | Build unit tests |
 | `FASTGJK_BUILD_BENCHMARKS=ON/OFF` | `ON` | Build benchmark programs |
-| `FASTGJK_LARGE_DATASET=ON/OFF` | `OFF` | Use large dataset (100,000 samples) for testing and benchmarking
+| `FASTGJK_LARGE_DATASET=ON/OFF` | `OFF` | Use a large dataset (100,000 samples) for testing and benchmarking |
 
 # Unit tests
 To run a test suite:
 - GJK tests: `./build/tests/testGJK`
-- GJK tests with large dataset (`FASTGJK_LARGE_DATASET=ON`): `./build/tests/testGJK_arge`
+- GJK tests with large dataset (`FASTGJK_LARGE_DATASET=ON`): `./build/tests/testGJK_large`
 
 # Benchmarks
-We use [NVIDIA nvbench](https://github.com/NVIDIA/nvbench) for benchmarking our kernels among parameter space. To run benchmarks:
+We use [NVIDIA nvbench](https://github.com/NVIDIA/nvbench) to benchmark our kernels across the parameter space. To run benchmarks:
 ```bash
 ./build/benchmarks/benchGJK
 ```
@@ -33,6 +33,11 @@ To profile kernels:
 ./scripts/profile.sh
 ```
 
+# Performance
+FastGJK achieves an average speedup of 10% over the CUDA implementation of the open-source [openGJK](https://github.com/MattiaMontanari/openGJK).
+
+![Performance comparison with openGJK](performance.png)
+
 
 # Acknowledgements
-Our code is heavily borrowed from [OpenGJK](https://github.com/MattiaMontanari/openGJK).
+Our code borrows heavily from [OpenGJK](https://github.com/MattiaMontanari/openGJK).
